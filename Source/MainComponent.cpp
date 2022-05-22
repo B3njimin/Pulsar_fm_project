@@ -127,7 +127,7 @@ MainComponent::MainComponent() : keyBoardComponent(keyBoardState, juce::MidiKeyb
     setAudioChannels(0, 2);
 
     // give focus to the keyboard.
-    startTimer(400);
+    startTimer(40);
 
     buffer.setSize(1, (int)bufferSize + 1);
 

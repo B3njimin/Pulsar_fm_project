@@ -138,7 +138,7 @@ float Pulsar::getNextSample(float sampleRate)
         /* modulators are summed and scaled before added to carrier frequency. */
         auto modOnePlusTwo = modOne * (indexOne * _index) + modTwo * (indexTwo * _index);
 
-        auto carrierFrequency = _fundamental * _formant * pow((i + 1) * _formantSpread, 1.5f);
+        auto carrierFrequency = (_fundamental * _dutyCycles[i]) * _formant * pow((i + 1) * _formantSpread, 1.5f);
         
         carrierPhasors[i] += (carrierFrequency + modOnePlusTwo) * (1.0f / sampleRate);
 
