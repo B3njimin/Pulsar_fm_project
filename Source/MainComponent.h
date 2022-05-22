@@ -65,24 +65,24 @@ private:
     int writePos = 0;
 
     float fundamental = 220.0f;
-    float formant = 1.0f, formantSpread = 1.0f;
-    float dutyCycle = 1.0f;
+    float period = 1.0f, periodSpread = 1.0f;
+    float formant = 1.0f;
     float index = 0.0f;
     int maskingPercentage = 0;
 
     adsrGuiComponent ampAdsr;
 
     juce::Slider fundamentalSlider;
+    juce::Slider periodSlider;
+    juce::Slider periodSpreadSlider;
     juce::Slider formantSlider;
-    juce::Slider formantSpreadSlider;
-    juce::Slider dutyCycleSlider;
     juce::Slider indexSlider;
     juce::Slider stochasticMaskingSlider;
 
     juce::Label fundamentalLabel;
+    juce::Label periodLabel;
+    juce::Label periodSpreadLabel;
     juce::Label formantLabel;
-    juce::Label formantSpreadLabel;
-    juce::Label dutyCycleLabel;
     juce::Label indexLabel;
     juce::Label stochasticMaskingLabel;
 
@@ -91,8 +91,8 @@ private:
     bool keyboardControl = false;
 
     Smooth fundamentalSmooth;
+    Smooth periodSmooth, periodSpreadSmooth;
     Smooth formantSmooth, formantSpreadSmooth;
-    Smooth dutyCycleSmooth, dutyCycleSpreadSmooth;
 
     int lastInputIndex = 0;
     bool isAddingFromMidiInput = false;

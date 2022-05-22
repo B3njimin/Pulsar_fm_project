@@ -25,9 +25,9 @@ public:
     void amplitudeEnvelope(float set_attack, float set_decay, float set_sustain, float set_release);
     void setFundamental(float fundamental);
     void setKeyboardControl(bool keyboardControl);
+    void setPeriod(float period);
+    void setPeriodSpread(float spread);
     void setFormant(float formant);
-    void setFormantSpread(float spread);
-    void setDutyCycle(float dutyCycle);
     void setIndex(float index);
     void setMasking(int masking);
 private:

@@ -32,7 +32,7 @@ Pulsar::Pulsar(const juce::AudioSampleBuffer& waveTableToUse, const juce::AudioS
         modulatorsTwo.add (modulatorTwo);
 
         /* initialise float vectors. */
-        _dutyCycles         .push_back(0.0f);
+        _formants           .push_back(0.0f);
         waveletPhasors      .push_back(0.0f);
         windowPhasors       .push_back(0.0f);
         modulatorOnePhasors .push_back(0.0f);
@@ -54,17 +54,17 @@ void Pulsar::setFundamental(float fundamental)
     _fundamental = fundamental;
 }
 
-void Pulsar::setFormant(float formant, float spread)
+void Pulsar::setPeriod(float period, float spread)
 {
-    _formant = formant;
-    _formantSpread = spread;
+    _period = period;
+    _periodSpread = spread;
 }
 
-void Pulsar::setDutyCycle(float dutyCycle)
+void Pulsar::setFormant(float formant)
 {
     for (int i = 0; i < numWavelets; ++i)
     {
-        _dutyCycles[i] = (1.0f / dutyCycle);
+        _formants[i] = (1.0f / formant);
     }
 }
 
@@ -129,21 +129,21 @@ float Pulsar::getNextSample(float sampleRate)
         * This is a parallel modulation system as opposed to a seriers or stacked system.
         */
 
-        modulatorTwoPhasors[i] += ((_fundamental * _formant) * ratioOne) * (1.0f / sampleRate);
+        modulatorTwoPhasors[i] += (((_fundamental * _formants[i]) * _period) * ratioOne) * (1.0f / sampleRate);
         auto modTwo = modulatorsTwo[i]->getNextSample(modulatorTwoPhasors[i]);
 
-        modulatorOnePhasors[i] += (((_fundamental * _formant) * ratioTwo)) * (1.0f / sampleRate);
+        modulatorOnePhasors[i] += ((((_fundamental * _formants[i]) * _period) * ratioTwo)) * (1.0f / sampleRate);
         auto modOne = modulatorsOne[i]->getNextSample(modulatorOnePhasors[i]);
  
         /* modulators are summed and scaled before added to carrier frequency. */
         auto modOnePlusTwo = modOne * (indexOne * _index) + modTwo * (indexTwo * _index);
 
-        auto carrierFrequency = (_fundamental * _dutyCycles[i]) * _formant * pow((i + 1) * _formantSpread, 1.5f);
+        auto carrierFrequency = (_fundamental * _formants[i]) * _period * pow((i + 1) * _periodSpread, 1.5f);
         
         carrierPhasors[i] += (carrierFrequency + modOnePlusTwo) * (1.0f / sampleRate);
 
         /* ensure the phasor does not exceed one, a clamp to squish the window. */
-        windowPhasors[i] = (fundamentalPhasor * _dutyCycles[i] > 1.0f) ? 1.0f : fundamentalPhasor * _dutyCycles[i];
+        windowPhasors[i] = (fundamentalPhasor * _formants[i] > 1.0f) ? 1.0f : fundamentalPhasor * _formants[i];
     }
 
     /* clear output. */

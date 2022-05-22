@@ -19,8 +19,8 @@ public:
     ~Pulsar();
     float getNextSample(float sampleRate);
     void setFundamental(float fundamental);
-    void setFormant(float formant, float spread);
-    void setDutyCycle(float dutyCycle);
+    void setPeriod(float period, float spread);
+    void setFormant(float formant);
     void setIndex(float index);
     void setStochasticMasking(int maskingPercentage);
 private:
@@ -31,7 +31,7 @@ private:
     juce::OwnedArray<Wavetable> windows;
     juce::OwnedArray<Wavetable> modulatorsOne, modulatorsTwo;
 
-    std::vector<float> _dutyCycles;
+    std::vector<float> _formants;
     std::vector<float> waveletPhasors;
     std::vector<float> windowPhasors;
     std::vector<float> carrierPhasors, modulatorOnePhasors, modulatorTwoPhasors;
@@ -40,7 +40,7 @@ private:
     float fundamentalPhasor = 0.0f;
 
     float _fundamental = 0.0f;
-    float _formant = 0.0f, _formantSpread = 0.0f;
+    float _period = 0.0f, _periodSpread = 0.0f;
     float _index = 0.0f;
     int _maskingPercentage = 50;
 

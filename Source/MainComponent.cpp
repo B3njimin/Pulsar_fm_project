@@ -30,6 +30,40 @@ MainComponent::MainComponent() : keyBoardComponent(keyBoardState, juce::MidiKeyb
     fundamentalSlider.onValueChange = [this] { fundamental = (float)fundamentalSlider.getValue(); };
     fundamentalSlider.setMouseClickGrabsKeyboardFocus(false);
 
+    addAndMakeVisible(periodSlider);
+    addAndMakeVisible(periodLabel);
+
+    periodLabel.attachToComponent(&periodSlider, false);
+    periodLabel.setText("Period", juce::dontSendNotification);
+    periodLabel.setJustificationType(juce::Justification::centred);
+    periodLabel.setMouseClickGrabsKeyboardFocus(false);
+
+    periodSlider.setRange(1, 12.0);
+    periodSlider.setValue(period, juce::dontSendNotification);
+    periodSlider.setNumDecimalPlacesToDisplay(displayNum);
+    periodSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 30);
+    periodSlider.setSliderStyle(juce::Slider::LinearVertical);
+    periodSlider.addListener(this);
+    periodSlider.onValueChange = [this] { period = (float)periodSlider.getValue(); };
+    periodSlider.setMouseClickGrabsKeyboardFocus(false);
+
+    addAndMakeVisible(periodSpreadSlider);
+    addAndMakeVisible(periodSpreadLabel);
+
+    periodSpreadLabel.attachToComponent(&periodSpreadSlider, false);
+    periodSpreadLabel.setText("Spread", juce::dontSendNotification);
+    periodSpreadLabel.setJustificationType(juce::Justification::centred);
+    periodSpreadLabel.setMouseClickGrabsKeyboardFocus(false);
+
+    periodSpreadSlider.setRange(1, 2.0);
+    periodSpreadSlider.setValue(periodSpread, juce::dontSendNotification);
+    periodSpreadSlider.setNumDecimalPlacesToDisplay(displayNum);
+    periodSpreadSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 30);
+    periodSpreadSlider.setSliderStyle(juce::Slider::LinearVertical);
+    periodSpreadSlider.addListener(this);
+    periodSpreadSlider.onValueChange = [this] { periodSpread = (float)periodSpreadSlider.getValue(); };
+    periodSpreadSlider.setMouseClickGrabsKeyboardFocus(false);
+
     addAndMakeVisible(formantSlider);
     addAndMakeVisible(formantLabel);
 
@@ -38,7 +72,8 @@ MainComponent::MainComponent() : keyBoardComponent(keyBoardState, juce::MidiKeyb
     formantLabel.setJustificationType(juce::Justification::centred);
     formantLabel.setMouseClickGrabsKeyboardFocus(false);
 
-    formantSlider.setRange(1, 12.0);
+    formantSlider.setRange(0.01, 1.0);
+    formantSlider.setSkewFactor(0.4);
     formantSlider.setValue(formant, juce::dontSendNotification);
     formantSlider.setNumDecimalPlacesToDisplay(displayNum);
     formantSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 30);
@@ -46,41 +81,6 @@ MainComponent::MainComponent() : keyBoardComponent(keyBoardState, juce::MidiKeyb
     formantSlider.addListener(this);
     formantSlider.onValueChange = [this] { formant = (float)formantSlider.getValue(); };
     formantSlider.setMouseClickGrabsKeyboardFocus(false);
-
-    addAndMakeVisible(formantSpreadSlider);
-    addAndMakeVisible(formantSpreadLabel);
-
-    formantSpreadLabel.attachToComponent(&formantSpreadSlider, false);
-    formantSpreadLabel.setText("Spread", juce::dontSendNotification);
-    formantSpreadLabel.setJustificationType(juce::Justification::centred);
-    formantSpreadLabel.setMouseClickGrabsKeyboardFocus(false);
-
-    formantSpreadSlider.setRange(1, 6.0);
-    formantSpreadSlider.setValue(formantSpread, juce::dontSendNotification);
-    formantSpreadSlider.setNumDecimalPlacesToDisplay(displayNum);
-    formantSpreadSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 30);
-    formantSpreadSlider.setSliderStyle(juce::Slider::LinearVertical);
-    formantSpreadSlider.addListener(this);
-    formantSpreadSlider.onValueChange = [this] { formantSpread = (float)formantSpreadSlider.getValue(); };
-    formantSpreadSlider.setMouseClickGrabsKeyboardFocus(false);
-
-    addAndMakeVisible(dutyCycleSlider);
-    addAndMakeVisible(dutyCycleLabel);
-
-    dutyCycleLabel.attachToComponent(&dutyCycleSlider, false);
-    dutyCycleLabel.setText("DutyCycle", juce::dontSendNotification);
-    dutyCycleLabel.setJustificationType(juce::Justification::centred);
-    dutyCycleLabel.setMouseClickGrabsKeyboardFocus(false);
-
-    dutyCycleSlider.setRange(0.01, 1.0);
-    dutyCycleSlider.setSkewFactor(0.4);
-    dutyCycleSlider.setValue(dutyCycle, juce::dontSendNotification);
-    dutyCycleSlider.setNumDecimalPlacesToDisplay(displayNum);
-    dutyCycleSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 30);
-    dutyCycleSlider.setSliderStyle(juce::Slider::LinearVertical);
-    dutyCycleSlider.addListener(this);
-    dutyCycleSlider.onValueChange = [this] { dutyCycle = (float)dutyCycleSlider.getValue(); };
-    dutyCycleSlider.setMouseClickGrabsKeyboardFocus(false);
 
     addAndMakeVisible(indexSlider);
     addAndMakeVisible(indexLabel);
@@ -181,9 +181,9 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
     synthAudioSource.amplitudeEnvelope  (ampAdsr.getAttack(), ampAdsr.getDecay(), ampAdsr.getSustain(), ampAdsr.getRelease());
     synthAudioSource.setKeyboardControl (keyboardControl);
     synthAudioSource.setFundamental     (fundamental);
+    synthAudioSource.setPeriod          (period);
+    synthAudioSource.setPeriodSpread    (periodSpread);
     synthAudioSource.setFormant         (formant);
-    synthAudioSource.setFormantSpread   (formantSpread);
-    synthAudioSource.setDutyCycle       (dutyCycle);
     synthAudioSource.setIndex           (index);
     synthAudioSource.setMasking         (maskingPercentage);
 }
@@ -227,10 +227,10 @@ void MainComponent::resized()
     ampAdsr.setBounds(width / 2 - (adsrWidth / 2), 0, adsrWidth, adsrHeight - margin);
 
     fundamentalSlider.setBounds       (0,                  adsrHeight, sliderWidth, sliderHeight - margin);
-    formantSlider.setBounds           (sliderDistance,     adsrHeight, sliderWidth, sliderHeight - margin);
-    formantSpreadSlider.setBounds     (sliderDistance * 2, adsrHeight, sliderWidth, sliderHeight - margin);
+    periodSlider.setBounds            (sliderDistance,     adsrHeight, sliderWidth, sliderHeight - margin);
+    periodSpreadSlider.setBounds      (sliderDistance * 2, adsrHeight, sliderWidth, sliderHeight - margin);
     indexSlider.setBounds             (sliderDistance * 4, adsrHeight, sliderWidth, sliderHeight - margin);
-    dutyCycleSlider.setBounds         (sliderDistance * 3, adsrHeight, sliderWidth, sliderHeight - margin);
+    formantSlider.setBounds           (sliderDistance * 3, adsrHeight, sliderWidth, sliderHeight - margin);
     stochasticMaskingSlider.setBounds (sliderDistance * 5, adsrHeight, sliderWidth, sliderHeight - margin);
 }
 

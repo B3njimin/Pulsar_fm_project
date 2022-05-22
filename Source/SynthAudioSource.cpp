@@ -141,8 +141,8 @@ struct PulsarVoice : public juce::SynthesiserVoice
             _pulsar->setFundamental(_fundamental);
         }
         
-        _pulsar->setFormant(_formant, _formantSpread);
-        _pulsar->setDutyCycle(_dutyCycle);
+        _pulsar->setPeriod(_period, _periodSpread);
+        _pulsar->setFormant(_formant);
         _pulsar->setIndex(_index);
         _pulsar->setStochasticMasking(_masking);
     }
@@ -181,13 +181,13 @@ struct PulsarVoice : public juce::SynthesiserVoice
                  _pulsar->setFundamental(smoothFundamental);
              }
 
+             auto smoothPeriod = periodSmooth.smooth(_period, numSamples);
+             auto smoothSpread = periodSpreadSmooth.smooth(_periodSpread, numSamples);
              auto smoothFormant = formantSmooth.smooth(_formant, numSamples);
-             auto smoothSpread = formantSpreadSmooth.smooth(_formantSpread, numSamples);
-             auto smoothDutyCycle = dutyCycleSmooth.smooth(_dutyCycle, numSamples);
              auto smoothIndex = indexSmooth.smooth(_index, numSamples);
              
-             _pulsar->setFormant(smoothFormant, smoothSpread);
-             _pulsar->setDutyCycle(smoothDutyCycle);
+             _pulsar->setPeriod(smoothPeriod, smoothSpread);
+             _pulsar->setFormant(smoothFormant);
              _pulsar->setIndex(smoothIndex);
              _pulsar->setStochasticMasking(_masking);
 
@@ -256,8 +256,8 @@ struct PulsarVoice : public juce::SynthesiserVoice
     float amplitudeAttack = 0.0f, amplitudeDecay = 0.0f, amplitudeSustain = 0.0f, amplitudeRelease = 0.0f;
     float _fundamental = 100.0f;
     bool _keyboardControl = false;
-    float _formant = 0.0f, _formantSpread = 0.0f;
-    float _dutyCycle = 0.0f;
+    float _period = 0.0f, _periodSpread = 0.0f;
+    float _formant = 0.0f;
     float _index = 0.0f;
     int   _masking = 0;
 private:
@@ -270,7 +270,7 @@ private:
     juce::AudioSampleBuffer windowTable;
     const unsigned int tableSize = 1 << 9;
     juce::Random random;
-    Smooth fundamentalSmooth, formantSmooth, formantSpreadSmooth, dutyCycleSmooth, indexSmooth;
+    Smooth fundamentalSmooth, periodSmooth, periodSpreadSmooth, formantSmooth, indexSmooth;
     double frequency = 0.0;
 };
 
@@ -347,6 +347,28 @@ void SynthAudioSource::setKeyboardControl(bool keyboardControl)
     }
 }
 
+void SynthAudioSource::setPeriod(float period)
+{
+    for (auto i = 0; i < synth.getNumVoices(); ++i)
+    {
+        juce::SynthesiserVoice* voicePtr{ synth.getVoice(i) };
+        PulsarVoice* PulsarVoicePtr{ dynamic_cast<PulsarVoice*> (voicePtr) };
+
+        PulsarVoicePtr->_period = period;
+    }
+}
+
+void SynthAudioSource::setPeriodSpread(float spread)
+{
+    for (auto i = 0; i < synth.getNumVoices(); ++i)
+    {
+        juce::SynthesiserVoice* voicePtr{ synth.getVoice(i) };
+        PulsarVoice* PulsarVoicePtr{ dynamic_cast<PulsarVoice*> (voicePtr) };
+
+        PulsarVoicePtr->_periodSpread = spread;
+    }
+}
+
 void SynthAudioSource::setFormant(float formant)
 {
     for (auto i = 0; i < synth.getNumVoices(); ++i)
@@ -354,29 +376,7 @@ void SynthAudioSource::setFormant(float formant)
         juce::SynthesiserVoice* voicePtr{ synth.getVoice(i) };
         PulsarVoice* PulsarVoicePtr{ dynamic_cast<PulsarVoice*> (voicePtr) };
 
-        PulsarVoicePtr->_formant = formant;
-    }
-}
-
-void SynthAudioSource::setFormantSpread(float spread)
-{
-    for (auto i = 0; i < synth.getNumVoices(); ++i)
-    {
-        juce::SynthesiserVoice* voicePtr{ synth.getVoice(i) };
-        PulsarVoice* PulsarVoicePtr{ dynamic_cast<PulsarVoice*> (voicePtr) };
-
-        PulsarVoicePtr->_formantSpread = spread;
-    }
-}
-
-void SynthAudioSource::setDutyCycle(float dutyCycle)
-{
-    for (auto i = 0; i < synth.getNumVoices(); ++i)
-    {
-        juce::SynthesiserVoice* voicePtr{ synth.getVoice(i) };
-        PulsarVoice* PulsarVoicePtr{ dynamic_cast<PulsarVoice*> (voicePtr) };
-
-        PulsarVoicePtr->_dutyCycle  = dutyCycle;
+        PulsarVoicePtr->_formant  = formant;
     }
 }
 
