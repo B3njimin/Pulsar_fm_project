@@ -278,7 +278,7 @@ private:
 
 SynthAudioSource::SynthAudioSource(juce::MidiKeyboardState& keyState) : keyboardState(keyState)
 {
-    for (auto i = 0; i < 16; ++i)
+    for (auto i = 0; i < numVoices; ++i)
     {
         synth.addVoice(new PulsarVoice);
     }

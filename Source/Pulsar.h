@@ -25,7 +25,7 @@ public:
     void setStochasticMasking(int maskingPercentage);
 private:
     /* number of waveforms within a single envelope. */
-    int numWavelets = 5;
+    int numWavelets = 3;
     
     juce::OwnedArray<Wavetable> wavelets;
     juce::OwnedArray<Wavetable> windows;
@@ -45,11 +45,11 @@ private:
     int _maskingPercentage = 50;
 
     /* I chose these values to create a formant, vowel like sound. */
-    float ratioOne = 2.0f;
+    float ratioOne = 0.5f;
     float ratioTwo = 9.0f;
 
-    float indexOne = 1500.0f;
-    float indexTwo = 1250.0f;
+    float indexOne = 1000.0f;
+    float indexTwo = 1000.0f;
 
     juce::Random random;
 };

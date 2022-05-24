@@ -34,4 +34,5 @@ private:
     // base class for a synthesiser.
     juce::Synthesiser synth;
     juce::MidiKeyboardState& keyboardState;
+    int numVoices = 1;
 };
