@@ -172,7 +172,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 
     currentSampleRate = sampleRate;
 
-    _oscillator = std::make_unique<Pulsar>(sineTable, windowTable);
+    // _oscillator = std::make_unique<Pulsar>(sineTable, windowTable);
 }
 
 void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)

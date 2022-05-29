@@ -15,7 +15,7 @@ Wavetable::Wavetable(const juce::AudioSampleBuffer& tableToUse)
     tableSize(wavetable.getNumSamples() - 1)
 {
     /* this should be here but It created error's when testing on apple machines */
-    jassert(wavetable.getNumChannels() == 1);
+     jassert(wavetable.getNumChannels() == 1);
 }
 
 float Wavetable::getNextSample(float index)
@@ -49,7 +49,6 @@ float Wavetable::getNextSample(float index)
     * This may not be the ideal solution test further.
     */
     _index = abs(fmod(index * (float)tableSize, (float)tableSize));
-    
     return currentSample;
 }
 

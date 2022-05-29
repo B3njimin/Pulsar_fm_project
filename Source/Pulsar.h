@@ -45,11 +45,13 @@ private:
     int _maskingPercentage = 50;
 
     /* I chose these values to create a formant, vowel like sound. */
-    float ratioOne = 0.5f;
-    float ratioTwo = 9.0f;
+    float ratioOne = 1.0f;
+    float ratioTwo = 6.0f;
 
     float indexOne = 1000.0f;
     float indexTwo = 1000.0f;
+
+    float feedback = 0.0f;
 
     juce::Random random;
 };

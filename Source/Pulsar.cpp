@@ -114,10 +114,14 @@ float Pulsar::getNextSample(float sampleRate)
                 modulatorOnePhasors [i] = 0.0f;
                 modulatorTwoPhasors [i] = 0.0f;
                 carrierPhasors      [i] = 0.0f;
+                windowPhasors       [i] = 0.0f;
             }
         }
     }
     
+    /* clear output. */
+    auto output = 0.0f;
+
     for (int i = 0; i < numWavelets; ++i)
     {
         /*
@@ -127,33 +131,37 @@ float Pulsar::getNextSample(float sampleRate)
         * 
         * Here the ratio's are fixed, this of course needs parametising in the future.
         * This is a parallel modulation system as opposed to a seriers or stacked system.
+        * 
+        * Sadly this is Frequency not Phase modulation.
         */
 
         modulatorTwoPhasors[i] += (((_fundamental * _formants[i]) * _period) * ratioOne) * (1.0f / sampleRate);
         auto modTwo = modulatorsTwo[i]->getNextSample(modulatorTwoPhasors[i]);
 
-        modulatorOnePhasors[i] += ((((_fundamental * _formants[i]) * _period) * ratioTwo)) * (1.0f / sampleRate);
+        modulatorOnePhasors[i] += ((((_fundamental * _formants[i]) * _period) * ratioTwo) /* + (modTwo * (indexTwo * _index)) */) * (1.0f / sampleRate);
         auto modOne = modulatorsOne[i]->getNextSample(modulatorOnePhasors[i]);
  
         /* modulators are summed and scaled before added to carrier frequency. */
-        auto modOnePlusTwo = modOne * (indexOne * _index) + modTwo * (indexTwo * _index);
+        auto modOnePlusTwo = ((modOne * indexOne) + (modTwo * indexTwo))  * _index;
 
         auto carrierFrequency = (_fundamental * _formants[i]) * _period * pow((i + 1) * _periodSpread, 1.5f);
         
-        carrierPhasors[i] += (carrierFrequency + modOnePlusTwo) * (1.0f / sampleRate);
+        carrierPhasors[i] += (carrierFrequency  + modOnePlusTwo) * (1.0f / sampleRate);
 
         /* ensure the phasor does not exceed one, a clamp to squish the window. */
         windowPhasors[i] = (fundamentalPhasor * _formants[i] > 1.0f) ? 1.0f : fundamentalPhasor * _formants[i];
+
+        output += wavelets[i]->getNextSample(carrierPhasors[i]) * windows[i]->getNextSample(windowPhasors[i]);
     }
 
     /* clear output. */
-    auto output = 0.0f;
+    // auto output = 0.0f;
 
     /* 'window' the resulting waveforms and scale output by number of pulsarets. */
-    for (int i = 0; i < numWavelets; ++i)
-    {
-        output += wavelets[i]->getNextSample(carrierPhasors[i]) * windows[i]->getNextSample(windowPhasors[i]);
-    }
+    // for (int i = 0; i < numWavelets; ++i)
+    // {
+    //     output += wavelets[i]->getNextSample(carrierPhasors[i]) * windows[i]->getNextSample(windowPhasors[i]);
+    // }
 
     return output * (1.0f / (float)numWavelets);
 }

@@ -28,62 +28,6 @@ struct PulsarSound : public juce::SynthesiserSound
     {
     };
 
-    void createWindowTable()
-    {
-        /* Table size is calculated using the bit shift operator table size 512. */
-        windowTable.setSize(1, (int)tableSize + 1);
-        
-        /* ensure the space in memory isn't full of garbage. */
-        windowTable.clear();
-
-        /* get a pointer to the first position memory of the table. */
-        auto* samples = windowTable.getWritePointer(0);
-
-        /* calculate the increment to traverse the table size. */
-        auto angleDelta = juce::MathConstants<double>::twoPi / (double)(tableSize - 1);
-        auto currentAngle = 0.0;
-
-        /*
-        * calculate the hann window offset by half, subract half of 1.0 to begin with
-        * then as the index moves through the cosine subtract an increasing lower value until the centre
-        * then return back to sbtracting the full amount, creating tapered ends and a bulge in the centre.
-        */
-        for (unsigned int i = 0; i < tableSize; ++i)
-        {
-            auto sample = 0.5 - 0.5 * cos(currentAngle);
-            samples[i] = (float)sample;
-            currentAngle += angleDelta;
-        }
-
-        /* finally be sure the last sample equals the first, this saves wrapping when reading the table. */
-        samples[tableSize] = samples[0];
-    }
-
-    void createSineTable()
-    {
-        /*
-        * set table size with 1 channel.
-        * get write pointer channel 0.
-        */
-        sineTable.setSize(1, (int)tableSize + 1);
-        sineTable.clear();
-
-        auto* samples = sineTable.getWritePointer(0);
-
-        auto angleDelta = juce::MathConstants<double>::twoPi / (double)(tableSize - 1);
-        auto currentAngle = 0.0;
-
-        /* calculating the sine table is much simpler, just take the sine of angle delta. */
-        for (unsigned int i = 0; i < tableSize; ++i)
-        {
-            auto sample = std::sin(currentAngle);
-            samples[i] = (float)sample;
-            currentAngle += angleDelta;
-        }
-
-        samples[tableSize] = samples[0];
-    }
-
     bool appliesToNote(int) override { return true; }
     bool appliesToChannel(int) override { return true; }
 
